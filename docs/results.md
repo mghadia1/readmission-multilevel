@@ -77,7 +77,7 @@ By how many other conditions the hospital reports (pooled over the 5 hold-outs):
 | 4 | 660 | 0.0825 | 0.0845 | **0.0783** |
 | 5 | 647 | 0.0951 | 0.0935 | **0.0896** |
 
-The own-average approach only overtakes "ignore" at 5 conditions, once there is more evidence to average. Errors grow with the number of conditions because hospitals that report all six are larger, and CMS shrinks larger hospitals' ratios less (section 7).
+The own-average approach only overtakes "ignore" at 5 conditions, once there is more evidence to average. Errors grow with the number of conditions because hospitals that report more conditions are larger (median discharges per condition: 78, 117, 161, 213, and 300 for hospitals reporting 2 to 6 conditions), and CMS shrinks larger hospitals' ratios less (section 7). Hospitals reporting a single condition are the exception (median 373, probably specialty hospitals), but they are not in the hold-out.
 
 ## 6. States: raw means vs partial pooling
 
