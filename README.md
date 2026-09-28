@@ -2,7 +2,7 @@
 
 Medicare penalises hospitals whose patients are readmitted more than expected, condition by condition. **How much of that performance belongs to the hospital, how much to its state, and how much to the individual condition?** This project answers with **mixed-effects (multilevel) models in R**: 11,681 excess readmission ratios, from 2,818 hospitals in 51 states, covering six conditions each. It then tests whether "partial pooling" actually predicts better.
 
-> **Status: learning project (September 2026), local only, not pushed.** It is built, tested (10 `testthat` tests), and run on the real CMS data, and I am still practising explaining it. It is my second R project, so R is a **learning** skill. The ratios describe Medicare's FY2026 readmission program (performance period July 2021 – June 2024). They are not measured quality of care, and nothing here is causal.
+> **Status: learning project (September 2026).** It is built, tested (11 `testthat` tests), and run on the real CMS data, and I am still practising explaining it. It is my second R project, so R is a **learning** skill. The ratios describe Medicare's FY2026 readmission program (performance period July 2021 – June 2024). They are not measured quality of care, and nothing here is causal.
 
 ![Where the variation lives](docs/figures/variance_shares.png)
 
@@ -43,7 +43,7 @@ If these ratios were raw rates, small hospitals would be the *noisiest*. They ar
 cd readmission-multilevel
 Rscript -e 'install.packages("renv"); renv::restore()'   # exact package versions from renv.lock
 
-Rscript tests/run_tests.R              # 10 tests, offline (~8 s)
+Rscript tests/run_tests.R              # 11 tests, offline (~8 s)
 Rscript scripts/run.R download         # 2 CMS files, SHA-256 verified (~3.5 MB)
 Rscript scripts/run.R analyze          # models, hold-outs, figures -> outputs/ (~30 s)
 ```

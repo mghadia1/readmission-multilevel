@@ -17,7 +17,7 @@
 | `R/models.R` | mixed models, variance shares, likelihood-ratio tests, ownership vs OLS, hold-out prediction, state shrinkage, dispersion by volume |
 | `R/plots.R` | ggplot2 figures |
 | `scripts/run.R` | `download` and `analyze` commands |
-| `tests/testthat/` | 10 tests |
+| `tests/testthat/` | 11 tests |
 | `renv.lock` | exact package versions |
 
 ## The ideas, in one line each
@@ -45,9 +45,10 @@
 
 1. **Default iteration limit.** The heteroscedastic model hit `nlme`'s default limit and failed to converge. The limits are raised in `lme_control()`.
 2. **State shrinkage compared unlike things, twice.** First unweighted rows against a weighted, adjusted estimate; then a ratio that explodes near zero. Both are described in `results.md` §6.
-3. **Test tolerances that tested nothing.** testthat 3 ignores `scale =`, so `tolerance` was *relative*: the ownership check would have accepted anything from −4.4% to +0.4%. The tests now assert absolute errors.
+3. **A convergence failure only on Linux.** On GitHub's CI runner, `nlme`'s default optimizer failed to converge on one simulated test case that passes on macOS. `fit_lme()` now retries with `optim` only when the default reports non-convergence. A test confirms both optimizers reach the same log-likelihood on that case, so the fallback changes how the optimum is found, not which model is fit.
+4. **Test tolerances that tested nothing.** testthat 3 ignores `scale =`, so `tolerance` was *relative*: the ownership check would have accepted anything from −4.4% to +0.4%. The tests now assert absolute errors.
 
-## Tests (10)
+## Tests (11)
 
 - **CMS parsing:** "N/A" ratios are dropped; "Too Few to Report" discharges become NA but the row is kept; condition names are extracted; ownership labels are grouped; checksum rejection.
 - **On simulated hospitals with known variances:**
@@ -57,7 +58,7 @@
   - the hold-out takes exactly one condition per eligible hospital;
   - partial pooling beats both no pooling and complete pooling;
   - small states are pulled harder than large ones.
-- **Dispersion-by-volume arithmetic.**
+- **Dispersion-by-volume arithmetic**, and the fallback optimizer reaching the same fit as the default.
 
 ## Things to be able to explain
 

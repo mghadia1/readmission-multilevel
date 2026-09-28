@@ -78,3 +78,10 @@ test_that("dispersion by volume reports each band", {
   expect_equal(out$rows, c(2, 2, 1))
   expect_equal(out$sd_log_err[1], sd(log(c(1, 1.1))))
 })
+
+test_that("the fallback optimizer reaches the same fit as the default", {
+  d <- simulate_hospitals(seed = 7, sd_state = 0.03)
+  default <- lme(y ~ condition + ownership, random = ~ 1 | state/facility_id, data = d, control = lme_control("nlminb"))
+  fallback <- lme(y ~ condition + ownership, random = ~ 1 | state/facility_id, data = d, control = lme_control("optim"))
+  expect_lt(abs(as.numeric(logLik(default)) - as.numeric(logLik(fallback))), 0.01)
+})

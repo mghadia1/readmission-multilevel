@@ -8,14 +8,26 @@
 
 library(nlme)
 
-lme_control <- function() lmeControl(maxIter = 200, msMaxIter = 200, niterEM = 100)
+lme_control <- function(opt = "nlminb") lmeControl(maxIter = 200, msMaxIter = 200, niterEM = 100, opt = opt)
+
+# Fit with nlme's default optimizer (nlminb); if it reports non-convergence,
+# refit with optim. On GitHub's Linux runner nlminb failed on one simulated
+# test case that converges on macOS; on macOS both optimizers reach the same
+# log-likelihood for that case, so the fallback changes how the optimum is
+# found, not which model is fit. A second failure is still an error.
+fit_lme <- function(...) {
+  tryCatch(lme(..., control = lme_control("nlminb")),
+           error = function(e) {
+             if (!grepl("convergence", conditionMessage(e))) stop(e)
+             lme(..., control = lme_control("optim"))
+           })
+}
 
 fit_mixed <- function(data, formula = y ~ condition + ownership, heteroscedastic = TRUE, method = "REML") {
   # varIdent lets each condition have its own residual spread: hip/knee ratios
   # vary far more than COPD ratios, and one shared variance would misweight them.
   weights <- if (heteroscedastic) varIdent(form = ~ 1 | condition) else NULL
-  lme(formula, random = ~ 1 | state/facility_id, data = data, weights = weights,
-      method = method, control = lme_control())
+  fit_lme(formula, random = ~ 1 | state/facility_id, data = data, weights = weights, method = method)
 }
 
 # Shares of variance at each level, from a homoscedastic fit (one residual
@@ -48,10 +60,8 @@ condition_shares <- function(model) {
 # these p-values are conservative - roughly twice the true value.)
 level_tests <- function(data) {
   flat <- gls(y ~ condition + ownership, data = data, method = "ML")
-  hosp <- lme(y ~ condition + ownership, random = ~ 1 | facility_id, data = data, method = "ML",
-              control = lme_control())
-  both <- lme(y ~ condition + ownership, random = ~ 1 | state/facility_id, data = data, method = "ML",
-              control = lme_control())
+  hosp <- fit_lme(y ~ condition + ownership, random = ~ 1 | facility_id, data = data, method = "ML")
+  both <- fit_lme(y ~ condition + ownership, random = ~ 1 | state/facility_id, data = data, method = "ML")
   lr <- function(a, b) {
     stat <- 2 * (as.numeric(logLik(b)) - as.numeric(logLik(a)))
     c(lr = stat, p = pchisq(stat, df = 1, lower.tail = FALSE))
